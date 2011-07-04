@@ -1,0 +1,3 @@
+[submodule "xlib-ada"]
+	path = xlib-ada
+	url = git://github.com/rtyler/xlib-ada.git
