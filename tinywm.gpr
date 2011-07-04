@@ -1,0 +1,21 @@
+
+project tinywm is
+    Version := "0.0.1";
+
+    type Mode_Type is ("debug", "release");
+    Mode : Mode_Type := external ("mode", "debug");
+
+    for Source_Dirs use ("src");
+    for Languages use ("Ada");
+    for Object_Dir use "obj/" & external ("mode", "debug");
+    for Main use ("src/tinywm.adb");
+
+    package Compiler is
+        case Mode is
+            when "debug" =>
+                for Switches ("Ada") use ("-g", "-gnat12");
+            when "release" =>
+                for Switches ("Ada") use ("-O2", "-gnat12");
+        end case;
+    end Compiler;
+end tinywm;
