@@ -5,6 +5,7 @@
 with Ada.Command_Line,
      Ada.Text_IO,
      Interfaces.C,
+     Interfaces.C.Strings,
      System,
      Xlib,
      Xlib.Event,
@@ -15,6 +16,7 @@ procedure TinyWM is
     package CLI renames Ada.Command_Line;
     use Ada.Text_IO,
         Interfaces.C,
+        Interfaces.C.Strings,
         System;
 
     Display : Xlib.Display_Type;
@@ -48,7 +50,19 @@ begin
 
     Root := Xlib.Default_Root_Window (Display);
 
-    -- Set up the move button key combo (Alt + LeftMouseClick)
+    -- Set up the raise key combo (Mod4 + F1)
+    Code := Xlib.Grab_Key (Display => Display,
+                           Key_Code => Xlib.Keys.Symbol_To_Code (Display,
+                                        Xlib.Keys.String_To_Symbol (New_String ("F1"))),
+                           Modifiers => Xlib.Keys.Mod4mask,
+                           Window => Root,
+                           Owner_Events => Xlib.True,
+                           Pointer_Mode => Xlib.GrabModeAsync,
+                           Keyboard_Mode => Xlib.GrabModeAsync);
+
+
+
+    -- Set up the move button key combo (Mod4 + LeftMouseClick)
     Code := Xlib.Grab_Button (Display => Display,
                               Button => 1,
                               Modifiers => Xlib.Keys.Mod4Mask,
@@ -60,7 +74,7 @@ begin
                               Confine_To => Xlib.Window_Type (Xlib.Null_Atom),
                               Cursor => Xlib.Cursor_Type (Xlib.Null_Atom));
 
-    -- Set up the resize key combo (Alt + RightMouseClick)
+    -- Set up the resize key combo (Mod4 + RightMouseClick)
     Code := Xlib.Grab_Button (Display => Display,
                               Button => 3,
                               Modifiers => Xlib.Keys.Mod4Mask,
@@ -76,6 +90,12 @@ begin
         Code := Xlib.Event.Next_Event (Display, Event'Unchecked_Access);
 
         case Event.C_Type is
+            when Xlib.Event.KeyPress =>
+                Put_Line ("Key pressed!");
+                if Event.XKey.Subwindow /= Xlib.Window_Type (Xlib.Null_Atom) then
+                    Code := Xlib.Raise_Window (Display, Event.XKey.Subwindow);
+                end if;
+
             when Xlib.Event.ButtonPress =>
                 Put_Line ("Button Pressed!");
                 Code := Xlib.Grab_Pointer (Display => Display,
