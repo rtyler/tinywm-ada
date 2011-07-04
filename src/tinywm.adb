@@ -5,7 +5,8 @@
 with Ada.Command_Line,
      Ada.Text_IO,
      System,
-     Xlib;
+     Xlib,
+     Xlib.Keys;
 
 procedure TinyWM is
     package CLI renames Ada.Command_Line;
@@ -14,7 +15,8 @@ procedure TinyWM is
 
     Display : Xlib.Display_Type;
     Window : Xlib.Window_Type;
-    Event : Xlib.Event_Ptr;
+    Event : aliased Xlib.XEvent;
+    Code : Xlib.Return_Code_Type;
 begin
     Put_Line ("Starting TinyWM");
 
@@ -31,15 +33,35 @@ begin
 
     Window := Xlib.Default_Root_Window (Display);
 
+    -- Set up the move button key combo (Alt + LeftMouseClick)
+    Code := Xlib.Grab_Button (Display => Display,
+                              Button => 1,
+                              Modifiers => Xlib.Keys.Mod1Mask,
+                              Grab_Window => Window,
+                              Owner_Events => Xlib.True,
+                              Event_Mask => Xlib.ButtonPressMask,
+                              Pointer_Mode => Xlib.GrabModeAsync,
+                              Keyboard_Mode => Xlib.GrabModeAsync,
+                              Confine_To => Xlib.Window_Type (Xlib.Null_Atom),
+                              Cursor => Xlib.Cursor_Type (Xlib.Null_Atom));
+
+    -- Set up the resize key combo (Alt + RightMouseClick)
+    Code := Xlib.Grab_Button (Display => Display,
+                              Button => 3,
+                              Modifiers => Xlib.Keys.Mod1Mask,
+                              Grab_Window => Window,
+                              Owner_Events => Xlib.True,
+                              Event_Mask => Xlib.ButtonPressMask,
+                              Pointer_Mode => Xlib.GrabModeAsync,
+                              Keyboard_Mode => Xlib.GrabModeAsync,
+                              Confine_To => Xlib.Window_Type (Xlib.Null_Atom),
+                              Cursor => Xlib.Cursor_Type (Xlib.Null_Atom));
+
     while true loop
-        declare
-            Code : Xlib.Return_Code_Type;
-        begin
-            Code := Xlib.Next_Event (Display, Event);
-            Put_Line ("Received an event (code: " &
-                        Xlib.Return_Code_Type'Image (Code) &
-                        ")");
-        end;
+        Code := Xlib.Next_Event (Display, Event'Unchecked_Access);
+        Put_Line ("Received an event (code: " &
+                    Xlib.Return_Code_Type'Image (Code) &
+                    ")");
     end loop;
 
 end TinyWM;
