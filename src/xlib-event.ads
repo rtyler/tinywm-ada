@@ -793,4 +793,9 @@ package Xlib.Event is
 
     function Next_Event (D : Display_Type; Event : Event_Ptr) return Return_Code_Type;
     pragma Import (C, Next_Event, "XNextEvent");
+
+    function Check_Typed_Event (Display : Display_Type;
+                                Event_Mask : Int;
+                                Event : Event_Ptr) return Return_Code_Type;
+    pragma Import (C, Check_Typed_Event, "XCheckTypedEvent");
 end Xlib.Event;

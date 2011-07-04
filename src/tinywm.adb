@@ -24,6 +24,14 @@ procedure TinyWM is
     Attributes : aliased Xlib.Window_Attributes_Type;
     Event : aliased Xlib.Event.XEvent;
     Code : Xlib.Return_Code_Type;
+
+    function Max (A : in Int; B : in Int) return Int is
+    begin
+        if A > B then
+            return A;
+        end if;
+        return B;
+    end Max;
 begin
     Put_Line ("Starting TinyWM");
 
@@ -94,7 +102,36 @@ begin
                                              Time => Xlib.CurrentTime);
 
             when Xlib.Event.MotionNotify =>
-                Put_Line ("MotionNotify");
+                Code := 1;
+                while Code > 0 loop
+                    Code := Xlib.Event.Check_Typed_Event (Display => Display,
+                                                          Event_Mask => Xlib.Event.MotionNotify,
+                                                          Event => Event'Unchecked_Access);
+                    declare
+                        X_Diff : Int := Event.XButton.X_Root - Start.X_Root;
+                        Y_Diff : Int := Event.XButton.Y_Root - Start.Y_Root;
+                        X : Int := Attributes.X;
+                        Y : Int := Attributes.Y;
+                        Width : Int := Attributes.Width;
+                        Height : Int := Attributes.Height;
+                        Move_Code : Xlib.Return_Code_Type;
+                    begin
+                        if Start.Button = 1 then
+                            X := Attributes.X + X_Diff;
+                            Y := Attributes.Y + Y_Diff;
+                        else
+                            Width := Max (1, Attributes.Width + X_Diff);
+                            Height := Max (1, Attributes.Height + Y_Diff);
+                        end if;
+
+                        Move_Code := Xlib.Move_Resize_Window (Display => Display,
+                                                              Window => Event.XMotion.The_Window,
+                                                              X => X,
+                                                              Y => Y,
+                                                              Width => Unsigned (Width),
+                                                              Height => Unsigned (Height));
+                    end;
+                end loop;
 
             when others =>
                 Put_Line ("Received an unhandled event (code: " &

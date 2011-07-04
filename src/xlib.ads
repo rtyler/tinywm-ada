@@ -67,7 +67,15 @@ package Xlib is
 
     function Ungrab_Pointer (Display : Display_Type;
                              Time    : Time_Type) return Return_Code_Type;
-   pragma Import (C, Ungrab_Pointer, "XUngrabPointer");
+    pragma Import (C, Ungrab_Pointer, "XUngrabPointer");
+
+    function Move_Resize_Window (Display : Display_Type;
+                                 Window  : Window_Type;
+                                 X       : Int;
+                                 Y       : Int;
+                                 Width   : Unsigned;
+                                 Height  : Unsigned) return Return_Code_Type;
+    pragma Import (C, Move_Resize_Window, "XMoveResizeWindow");
 
     type XPointer is new Interfaces.C.Strings.Chars_Ptr;
     type u_XExtData is record
