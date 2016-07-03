@@ -1,0 +1,22 @@
+= TinyWM in Ada
+
+This project is an evening experiment to port
+Nick Welch's http://incise.org/tinywm.html[tinywm] from C to Ada. Like the original, it
+uses Xlib as its underlying library.
+
+Also like the original, this code can be considered public domain.
+
+Most of the time spent was creating the proper bindings to Xlib in Ada, which
+was no fun.
+
+image::http://strongspace.com/rtyler/public/tinywm_ada_vimprobable.png[A useless screenshot]
+
+
+== Building
+
+. Get a GNAT toolchain
+. `git submodule update --init`
+. `make`
+. Run link:https://en.wikipedia.org/wiki/Xephyr[Xephyr]: `Xephyr :1`
+. Execute the tinywm: `DISPLAY=:1 ./obj/debug/tinywm`
+. Run something in that window manager: `DISPLAY=:1 xeyes`
